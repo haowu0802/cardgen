@@ -26,7 +26,7 @@ settings.configure(
 
 """above this point needs to run before below"""
 from django import forms  # for validation of attack and defence
-from PIL import Image  # image processor
+from PIL import Image, ImageDraw  # image processor, and drawer
 from io import BytesIO  # byte manipulator
 from django.conf.urls import url  # for routing in controller
 from django.http import HttpResponse, HttpResponseBadRequest  # for constructing response in views
@@ -45,6 +45,20 @@ class CardForm(forms.Form):
         height = self.cleaned_data['height']
         width = self.cleaned_data['width']
         image = Image.new('RGB', (width, height))  # pillow takes color, (w,h)
+
+        # make drawings on the card
+        draw = ImageDraw.Draw(image)  # set drawer on image
+        text = '{} X {} '.format(height, width)  # prepare text and format
+        textwidth, textheight = draw.textsize(text)  # get text size from prepared text
+        if textwidth < width and textheight < height:  # make sure text is within card
+            texttop = (height - textheight) // 2  # top pix of text
+            textleft = (width - textwidth) // 2  # left pix of text
+            draw.text(
+                (textleft, texttop),  # top left pos
+                text,  # text content
+                fill=(255, 255, 255),  # color of text
+            )
+
         content = BytesIO()  # init content to be transferred as raw bytes
         image.save(content, image_format)  # save image to content buffer with format
         content.seek(0)  # rewind content to beginning
