@@ -10,6 +10,7 @@ from django.conf import settings  # for Django settings, settings must be set be
 DEBUG = os.environ.get('DEBUG', 'on') == 'on'  # get debug flag from env, default on
 SECRET_KEY = os.environ.get('SECRET_KEY', os.urandom(32))  # get secret_key from env, default 32 b rand
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')  # allowing all
+BASE_DIR = os.path.dirname(__file__)  # pwd
 
 # the settings, typically in settings.py
 settings.configure(
@@ -22,6 +23,16 @@ settings.configure(
         'django.middleware.csrf.CsrfViewMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
     ),
+    INSTALLED_APPS=(
+        'django.contrib.staticfiles',
+    ),
+    TEMPLATE_DIRS=(
+        os.path.join(BASE_DIR, 'templates'),
+    ),
+    STATICFILES_DIRS=(
+        os.path.join(BASE_DIR, 'static'),
+    ),
+    STATIC_URL='/static/',
 )
 
 
@@ -31,6 +42,8 @@ from PIL import Image, ImageDraw  # image processor, and drawer
 from io import BytesIO  # byte manipulator
 from django.core.cache import cache  # core server cache
 from django.views.decorators.http import etag  # client cache
+from django.core.urlresolvers import reverse  # for reversing a url for home view example
+from django.shortcuts import render  # for rendering views
 from django.conf.urls import url  # for routing in controller
 from django.http import HttpResponse, HttpResponseBadRequest  # for constructing response in views
 from django.core.wsgi import get_wsgi_application  # wsgi application for prod server, usually in wsgi.py
@@ -98,8 +111,12 @@ def cardgen(request, height, width):
 
 
 def index(request):
-    """the view, typically in a view.py file, but that's not a requirement of Django"""
-    return HttpResponse('Card Generator')
+    """a home page for showing some examples"""
+    example = reverse('cardgen', kwargs={'width': 50, 'height': 50})
+    context = {
+        'example': request.build_absolute_uri(example)
+    }
+    return render(request, 'home.html', context)
 
 
 """the routing, typically in a urls.py file"""

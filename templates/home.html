@@ -1,0 +1,25 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Django Card Generator</title>
+  <link rel="stylesheet" type="text/css" href="{% static 'site.css' %}">
+</head>
+<body>
+  <h1>Django Card Generator</h1>
+  <p>The server can generate card in a customized width and height. </p>
+  <p>To request a card image of a given width and height, simply include an image with the src path:
+    <b>/cardgen/&lt;width&gt;x&lt;height&gt;/</b>
+    on this server such as:</p>
+  <pre>
+    &lt;img src="{{ example }}"&gt;
+  </pre>
+  <h2>Examples</h2>
+  <ul>
+    <li><img src="{% url 'cardgen' width=50 height=60 %}"></li>
+    <li><img src="{% url 'cardgen' width=100 height=40 %}"></li>
+    <li><img src="{% url 'cardgen' width=30 height=100 %}"></li>
+  </ul>
+</body>
+</html>
