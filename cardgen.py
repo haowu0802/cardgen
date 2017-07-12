@@ -45,6 +45,7 @@ settings.configure(
     ),
     STATIC_ROOT=os.path.join(BASE_DIR, 'staticfiles'),
     STATIC_URL='/static/',
+    STATICFILES_STORAGE='whitenoise.django.GzipManifestStaticFilesStorage',
 )
 
 
@@ -59,9 +60,12 @@ from django.shortcuts import render  # for rendering views
 
 from django.conf.urls import url  # for routing in controller
 from django.http import HttpResponse, HttpResponseBadRequest  # for constructing response in views
+
 from django.core.wsgi import get_wsgi_application  # wsgi application for prod server, usually in wsgi.py
+from whitenoise.django import DjangoWhiteNoise  # for serving static files in Heroku
 
 application = get_wsgi_application()  # init wsgi app
+application = DjangoWhiteNoise(application)  # add whitenoise static file support
 
 
 class CardForm(forms.Form):
