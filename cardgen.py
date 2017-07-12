@@ -3,6 +3,7 @@ A stateless web app for generating cards
 """
 import os  # for env var
 import sys  # for using manage.py with arguments
+import hashlib  # for generating hash for client cache
 from django.conf import settings  # for Django settings, settings must be set before importing other components
 
 # env dependent settings
@@ -28,6 +29,8 @@ settings.configure(
 from django import forms  # for validation of attack and defence
 from PIL import Image, ImageDraw  # image processor, and drawer
 from io import BytesIO  # byte manipulator
+from django.core.cache import cache  # core server cache
+from django.views.decorators.http import etag  # client cache
 from django.conf.urls import url  # for routing in controller
 from django.http import HttpResponse, HttpResponseBadRequest  # for constructing response in views
 from django.core.wsgi import get_wsgi_application  # wsgi application for prod server, usually in wsgi.py
@@ -44,27 +47,42 @@ class CardForm(forms.Form):
         """generate the card image, return raw bytes"""
         height = self.cleaned_data['height']
         width = self.cleaned_data['width']
-        image = Image.new('RGB', (width, height))  # pillow takes color, (w,h)
 
-        # make drawings on the card
-        draw = ImageDraw.Draw(image)  # set drawer on image
-        text = '{} X {} '.format(height, width)  # prepare text and format
-        textwidth, textheight = draw.textsize(text)  # get text size from prepared text
-        if textwidth < width and textheight < height:  # make sure text is within card
-            texttop = (height - textheight) // 2  # top pix of text
-            textleft = (width - textwidth) // 2  # left pix of text
-            draw.text(
-                (textleft, texttop),  # top left pos
-                text,  # text content
-                fill=(255, 255, 255),  # color of text
-            )
+        """cache"""
+        key = '{}.{}.{}'.format(width, height, image_format)
+        content = cache.get(key)  # read from cache
 
-        content = BytesIO()  # init content to be transferred as raw bytes
-        image.save(content, image_format)  # save image to content buffer with format
-        content.seek(0)  # rewind content to beginning
+        if content is None:  # no cached data found
+            image = Image.new('RGB', (width, height))  # pillow takes color, (w,h)
+
+            # make drawings on the card
+            draw = ImageDraw.Draw(image)  # set drawer on image
+            text = '{} X {} '.format(height, width)  # prepare text and format
+            textwidth, textheight = draw.textsize(text)  # get text size from prepared text
+            if textwidth < width and textheight < height:  # make sure text is within card
+                texttop = (height - textheight) // 2  # top pix of text
+                textleft = (width - textwidth) // 2  # left pix of text
+                draw.text(
+                    (textleft, texttop),  # top left pos
+                    text,  # text content
+                    fill=(255, 255, 255),  # color of text
+                )
+
+            content = BytesIO()  # init content to be transferred as raw bytes
+            image.save(content, image_format)  # save image to content buffer with format
+            content.seek(0)  # rewind content to beginning
+            cache.set(key, content, 60*60)  # cached for 1H
+
         return content  # content is raw bytes
 
 
+def generate_etag(request, width, height):
+    """generate etag for browser cache"""
+    content = 'Cardgen:{0}x{1}'.format(width, height)
+    return hashlib.sha1(content.encode('utf-8')).hexdigest()
+
+
+@etag(generate_etag)  # decorate view with generated etag for browser cache
 def cardgen(request, height, width):
     """attack defence, as 2 params for the generator"""
     # init form obj for validation
