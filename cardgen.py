@@ -14,7 +14,7 @@ from django.conf import settings  # for Django settings, settings must be set be
 DEBUG = os.environ.get('DEBUG', 'on') == 'on'  # get debug flag from env, default on
 SECRET_KEY = os.environ.get('SECRET_KEY', os.urandom(32))  # get secret_key from env, default 32 b rand
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')  # allowing all
-BASE_DIR = os.path.dirname(__file__)  # base dir of app
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # base dir of app
 
 # the settings, typically in settings.py
 settings.configure(
@@ -43,6 +43,7 @@ settings.configure(
     STATICFILES_DIRS=(
         os.path.join(BASE_DIR, 'static'),
     ),
+    STATIC_ROOT=os.path.join(BASE_DIR, 'staticfiles'),
     STATIC_URL='/static/',
 )
 
