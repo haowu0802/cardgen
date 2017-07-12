@@ -4,13 +4,17 @@ A stateless web app for generating cards
 import os  # for env var
 import sys  # for using manage.py with arguments
 import hashlib  # for generating hash for client cache
+
+from PIL import Image, ImageDraw  # image processor, and drawer
+from io import BytesIO  # byte manipulator
+
 from django.conf import settings  # for Django settings, settings must be set before importing other components
 
 # env dependent settings
 DEBUG = os.environ.get('DEBUG', 'on') == 'on'  # get debug flag from env, default on
 SECRET_KEY = os.environ.get('SECRET_KEY', os.urandom(32))  # get secret_key from env, default 32 b rand
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')  # allowing all
-BASE_DIR = os.path.dirname(__file__)  # pwd
+BASE_DIR = os.path.dirname(__file__)  # base dir of app
 
 # the settings, typically in settings.py
 settings.configure(
@@ -26,8 +30,15 @@ settings.configure(
     INSTALLED_APPS=(
         'django.contrib.staticfiles',
     ),
-    TEMPLATE_DIRS=(
-        os.path.join(BASE_DIR, 'templates'),
+    TEMPLATES=(
+        {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'DIRS': [
+                # insert your TEMPLATE_DIRS here
+                os.path.join(BASE_DIR, 'templates'),
+            ],
+            'APP_DIRS': True,
+        },
     ),
     STATICFILES_DIRS=(
         os.path.join(BASE_DIR, 'static'),
@@ -38,12 +49,13 @@ settings.configure(
 
 """above this point needs to run before below"""
 from django import forms  # for validation of attack and defence
-from PIL import Image, ImageDraw  # image processor, and drawer
-from io import BytesIO  # byte manipulator
+
 from django.core.cache import cache  # core server cache
 from django.views.decorators.http import etag  # client cache
+
 from django.core.urlresolvers import reverse  # for reversing a url for home view example
 from django.shortcuts import render  # for rendering views
+
 from django.conf.urls import url  # for routing in controller
 from django.http import HttpResponse, HttpResponseBadRequest  # for constructing response in views
 from django.core.wsgi import get_wsgi_application  # wsgi application for prod server, usually in wsgi.py
@@ -91,7 +103,7 @@ class CardForm(forms.Form):
 
 def generate_etag(request, width, height):
     """generate etag for browser cache"""
-    content = 'Cardgen:{0}x{1}'.format(width, height)
+    content = 'Card:{0}x{1}'.format(width, height)
     return hashlib.sha1(content.encode('utf-8')).hexdigest()
 
 
