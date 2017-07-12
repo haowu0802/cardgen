@@ -5,6 +5,20 @@ This server is based on the light-weight Django template https://github.com/haow
 It's a simple image generating server that generates and caches images requested of a certain width and height, that are best used as placeholders.
  
 To run:
+
   dev:      python cardgen.py runserver
+  
   staging:  gunicorn cardgen --log-files=-
+  
   prod:     gunicorn cardgen --log-files=-
+  
+  
+Dependencies:
+
+  Django==1.11.3
+  
+  gunicorn==19.7.1
+  
+  whitenoise==3.2
+  
+  pillow==4.2.1
