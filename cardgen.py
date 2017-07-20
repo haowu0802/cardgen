@@ -16,6 +16,13 @@ SECRET_KEY = os.environ.get('SECRET_KEY', os.urandom(32))  # get secret_key from
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')  # allowing all
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # base dir of app
 CUSTOM_URL_LIGHT_DJANGO = "https://github.com/haowu0802/single_file_django_hello/tree/single-file-django-template"
+BOX_COLOR = (0, 255, 0)
+TEXT_COLOR = (255, 0, 0)
+SHOWCASE = [
+    [60, 160],
+    [100, 40],
+    [200, 100],
+]
 
 # the settings, typically in settings.py
 settings.configure(
@@ -84,7 +91,7 @@ class CardForm(forms.Form):
         content = cache.get(key)  # read from cache
 
         if content is None:  # no cached data found
-            image = Image.new('RGB', (width, height))  # pillow takes color, (w,h)
+            image = Image.new('RGB', size=(width, height), color=BOX_COLOR)  # pillow takes color, (w,h)
 
             # make drawings on the card
             draw = ImageDraw.Draw(image)  # set drawer on image
@@ -96,7 +103,7 @@ class CardForm(forms.Form):
                 draw.text(
                     (textleft, texttop),  # top left pos
                     text,  # text content
-                    fill=(255, 255, 255),  # color of text
+                    fill=TEXT_COLOR,  # color of text
                 )
 
             content = BytesIO()  # init content to be transferred as raw bytes
@@ -131,9 +138,11 @@ def cardgen(request, height, width):
 def index(request):
     """a home page for showing some examples"""
     example = reverse('cardgen', kwargs={'width': 50, 'height': 50})
+    showcase = [request.build_absolute_uri(reverse('cardgen', kwargs={'width': w, 'height': d})) for w, d in SHOWCASE]
     context = {
         'example': request.build_absolute_uri(example),
         'light_weight': CUSTOM_URL_LIGHT_DJANGO,
+        'showcase': showcase,
     }
     return render(request, 'home.html', context)
 

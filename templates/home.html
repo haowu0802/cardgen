@@ -17,9 +17,9 @@
   </pre>
   <h2>Examples</h2>
   <ul>
-    <li><img src="{% url 'cardgen' width=60 height=160 %}"></li>
-    <li><img src="{% url 'cardgen' width=100 height=40 %}"></li>
-    <li><img src="{% url 'cardgen' width=200 height=100 %}"></li>
+    {% for img_url in showcase %}
+    <li><a href="{{ img_url }}"><img src="{{ img_url }}"></a></li>
+    {% endfor %}
   </ul>
 
   <p>This web service is built on <a href="{{ light_weight }}">the light weight implementation of Django framework by Hao Wu</a> </p>
