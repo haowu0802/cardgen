@@ -1,1 +1,1 @@
-web: gunicorn cardgen --log-file=-
+web: gunicorn cardgen
