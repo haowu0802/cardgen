@@ -15,6 +15,7 @@ DEBUG = os.environ.get('DEBUG', 'on') == 'on'  # get debug flag from env, defaul
 SECRET_KEY = os.environ.get('SECRET_KEY', os.urandom(32))  # get secret_key from env, default 32 b rand
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')  # allowing all
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # base dir of app
+CUSTOM_URL_LIGHT_DJANGO = "https://github.com/haowu0802/single_file_django_hello/tree/single-file-django-template"
 
 # the settings, typically in settings.py
 settings.configure(
@@ -131,7 +132,8 @@ def index(request):
     """a home page for showing some examples"""
     example = reverse('cardgen', kwargs={'width': 50, 'height': 50})
     context = {
-        'example': request.build_absolute_uri(example)
+        'example': request.build_absolute_uri(example),
+        'light_weight': CUSTOM_URL_LIGHT_DJANGO,
     }
     return render(request, 'home.html', context)
 

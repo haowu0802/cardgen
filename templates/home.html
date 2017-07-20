@@ -8,7 +8,7 @@
 </head>
 <body>
   <h1>Django Card Generator</h1>
-  <p>The server can generate card in a customized width and height. </p>
+  <p>The server can generate image card in a customized width and height. </p>
   <p>To request a card image of a given width and height, simply include an image with the src path:
     <b>/card/&lt;width&gt;x&lt;height&gt;/</b>
     on this server such as:</p>
@@ -21,5 +21,8 @@
     <li><img src="{% url 'cardgen' width=100 height=40 %}"></li>
     <li><img src="{% url 'cardgen' width=200 height=100 %}"></li>
   </ul>
+
+  <p>This web service is built on <a href="{{ light_weight }}">the light weight implementation of Django framework by Hao Wu</a> </p>
+
 </body>
 </html>
